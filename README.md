@@ -7,9 +7,12 @@ O sistema permite o cadastro de produtos, clientes, fornecedores e a realizaçã
 
     O sistema é baseado em um modelo de dados relacional, com as seguintes entidades principais:
     
-    * **Cliente:** O cliente pode se cadastrar com seu CPF ou CNPJ. Um cliente pode cadastrar mais de um endereço e ter mais de uma forma de pagamento.
-    * **Produto:** Representa os itens disponíveis para venda. Cada produto é vinculado a um fornecedor e pode estar associado a diferentes pedidos.
-    * **Pedido:** Representa as compras realizadas pelos clientes. Um pedido pode incluir múltiplos produtos e é associado a um cliente, com informações de status, descrição e frete.
+    * **Cliente:** O cliente pode se cadastrar com seu CPF ou CNPJ. Um cliente pode cadastrar 
+    mais de um endereço e ter mais de uma forma de pagamento.
+    * **Produto:** Representa os itens disponíveis para venda. Cada produto é vinculado a um 
+    fornecedor e pode estar associado a diferentes pedidos.
+    * **Pedido:** Representa as compras realizadas pelos clientes. Um pedido pode incluir 
+    múltiplos produtos e é associado a um cliente, com informações de status, descrição e frete.
     * **Fornecedor:** Representa os fornecedores de produtos disponíveis. Detalhes como Razão Sozial e CNPJ.
     * **Estoque:** Representa o controle de quantidade e local.
  
