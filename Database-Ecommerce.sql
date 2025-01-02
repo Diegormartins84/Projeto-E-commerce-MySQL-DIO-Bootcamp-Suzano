@@ -26,6 +26,19 @@ create table Product(
     Size varchar(10)
     -- constraint unique_cpf_client unique (CPF)
 );
+
+-- para ser continuado no desafio: termine de  implementar a tabela e crie a conexão com as tabelas necessárias
+-- além disso, reflita essa modificação no diagrama esquema relacional
+-- criar constraints relacionada ao pagamento
+
+create table Payments(
+IdClient int primary key,
+IdPayment int,
+TypePayment enum('Boleto','Cartão','Dois cartões'),
+LimitAvaible float,
+primary key (IdClient, IdPayment)
+);
+
 -- Criar tabela Pedido
 
 create table Orders(
@@ -34,5 +47,8 @@ create table Orders(
     OrderStatus enum('Cancelado', 'Confirmado', 'Em processamento') not null,
     OrderDescription varchar(255),
     SendValue float default 0,
+    PaymentCash bool default false,
+    -- IdPayment vai ser uma foreign key
     constraint fk_orders_client foreign key (IdOrderClient) references Clients(IdClient)
 );
+
