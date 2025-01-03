@@ -44,11 +44,73 @@ primary key (IdClient, IdPayment)
 create table Orders(
 	IdOrder int auto_increment primary key,
     IdOrderClient int ,
-    OrderStatus enum('Cancelado', 'Confirmado', 'Em processamento') not null,
+    OrderStatus enum('Cancelado', 'Confirmado', 'Em processamento') default 'Em processamento',
     OrderDescription varchar(255),
     SendValue float default 0,
     PaymentCash bool default false,
     -- IdPayment vai ser uma foreign key
     constraint fk_orders_client foreign key (IdOrderClient) references Clients(IdClient)
+);
+
+-- Criar tabela estoque
+
+create table productStorage(
+	IdProdStorage int auto_increment primary key,
+    Location varchar (255),
+    Quantity int default 0
+);
+
+-- Criar tabela fornecedor
+create table Supplier(
+	IdSupplier int auto_increment primary key,
+    SocialName varchar (255) not null,
+    CNPJ varchar (15) not null,
+    Contact char (11) not null,
+    constraint unique_supplier unique (CNPJ)
+);
+
+-- Criar tabela vendedor
+-- dica de melhoramento (modelo refinado), separar CPF e CNPJ
+
+create table Seller(
+	IdSeller int auto_increment primary key,
+    SocialName varchar (255) not null,
+    AbstName varchar (255),
+    CNPJ varchar (15),
+    CPF char (11),
+    Location varchar (255),
+    Contact char (11) not null,
+    constraint unique_cnpj_supplier unique (CNPJ),
+    constraint unique_cpf_supplier unique (CPF)
+);
+
+-- Produto vendedor
+
+create table productSeller(
+	idPseller int ,
+    idPproduct int ,
+	prodQuantity int default 1,
+    primary key (IdSeller, idProduct),
+    constraint fk_product_seller foreign key (idPseller) references Seller(IdSeller),
+    constraint fk_product_product foreign key (idPproduct) references Product(IdProduct)
+);
+
+create table ProductOrder(
+	idPOproduct int,
+    idPOorder int,
+    poQuantity int default 1,
+    poStatus enum('Disponível','Em estoque') default 'Disponível',
+    primary key (idPOproduct, idPOorder),
+	constraint fk_po_product foreign key (idPOproduct) references Product(idProduct),
+    constraint fk_po_order foreign key (idPOorder) references Orders(idOrder)
+);
+
+create table StorageLocation(
+	idLproduct int,
+    idLstorage int,
+    location varchar(255) not null,
+    primary key (idLproduct, idLstorage),
+    constraint fk_sl_product foreign key (idLproduct) references Product(idProduct),
+    constraint fk_sl_order foreign key (idLstorage) references Orders(idOrders)
 );
 
