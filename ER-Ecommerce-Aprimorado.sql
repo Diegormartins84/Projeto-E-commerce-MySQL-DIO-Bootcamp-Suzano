@@ -1,8 +1,9 @@
--- Criação do Banco de Dados para o cenário de E-commerce
--- drop database ecommerce;
+-- Criação do Banco de Dados para o cenário de E-commerce Aprimorado
+
+-- drop database ecommerce_aprimorado;
 show databases;
-create database if not exists ecommerce;
-use ecommerce;
+create database if not exists ecommerce_aprimorado;
+use ecommerce_aprimorado;
 
 -- Criar tabela Cliente
 create table Clients(
@@ -10,21 +11,39 @@ create table Clients(
     Fname varchar(10),
     Minit char(3),
     Lname varchar(20),
-    CPF char(11) not null,
+    ClientType enum ('PF','PJ') not null,
+    CPF char(11),
+    CNPJ char(15),
     Address varchar(255),
-	constraint unique_cpf_client unique (CPF)
+	constraint unique_cpf_client unique (CPF),
+    constraint unique_cnpj_client unique (CNPJ)
+ /*  ,constraint ck_tipo_cliente check (
+    (ClientType = 'PF' and CNPJ is null) or 
+    (ClientType = 'PJ' and CPF is null))*/
 );
 alter table Clients auto_increment = 1;
--- desc Clients;
+
+create table ClientePF (
+	idClientPF int,
+    CPF char(11),
+    Bdate date,
+    constraint fk_idclient_pf foreign key (idClientPF) references Clients(idClient)
+);
+create table ClientePJ(
+	idClientPJ int,
+    CNPJ char(15),
+    RazaoSocial varchar(50),
+    constraint fk_idclient_pj foreign key (idClientPJ) references Clients(idClient)
+);
 
 -- Criar tabela Produto
--- Size = dimensão do produto
+
 create table Product(
 	IdProduct int auto_increment primary key,
     Pname varchar(50) not null,
     Classification_kids bool default false,
     Category enum('Eletrônico','Vestimenta','Brinquedos','Alimentos','Móveis') not null,
-    Avaliação float default 0,
+    Avaliação enum('1','2','3','4','5') default 0,
     Size varchar(20)
 );
 alter table Product auto_increment = 1;
@@ -34,21 +53,21 @@ alter table Product auto_increment = 1;
 -- além disso, reflita essa modificação no diagrama esquema relacional
 -- criar constraints relacionada ao pagamento
 
-
 create table Payments(
 IdClient int,
-IdPayment int,
-TypePayment enum('Boleto','Cartão','Dois cartões'),
+IdPayment int auto_increment primary key,
+TypePayment enum('Boleto','Cartão','Dois cartões','Pix'),
 LimitAvaible float,
 primary key (IdClient, IdPayment)
 );
-
+alter table Payments auto_increment = 1;
 
 -- Criar tabela Pedido
 -- drop table orders;
+
 create table Orders(
 	IdOrder int auto_increment primary key,
-    IdOrderClient int ,
+    IdOrderClient int,
     OrderStatus enum('Cancelado','Confirmado','Em processamento') default 'Em processamento',
     OrderDescription varchar(255),
     SendValue float default 10,
@@ -89,19 +108,23 @@ create table Seller(
     AbstName varchar (255),
     CNPJ varchar (15),
     CPF char (11),
+    SellerType enum ('PF','PJ') not null,
     Location varchar (255),
     Contact char (11) not null,
     constraint unique_cnpj_supplier unique (CNPJ),
-    constraint unique_cpf_supplier unique (CPF)
-);
+    constraint unique_cpf_supplier unique (CPF),
+	constraint ck_tipo_vendedor check (
+    (SellerType = 'PF' and CNPJ is null) or 
+    (SellerType = 'PJ' and CPF is null)
+));
 alter table Seller auto_increment = 1;
 -- desc Seller;
 
 -- Produto vendedor
 
 create table productSeller(
-	idPseller int ,
-    idPproduct int ,
+	idPseller int,
+    idPproduct int,
 	prodQuantity int default 1,
     primary key (IdPseller, idPproduct),
     constraint fk_product_seller foreign key (idPseller) references Seller(IdSeller),
@@ -138,6 +161,18 @@ create table productSupplier(
     constraint fk_product_supplier_product foreign key (idPsProduct) references Product(IdProduct)
 );
 -- desc productSupplier;
+
+-- Criar tabela entrega
+
+create table Entrega (
+	idEntrega int auto_increment primary key,
+    idOrder int,
+    entregaStatus enum('Em preparação','Enviado','Entregue','Cancelado'),
+    codigoRastreamento varchar(50),
+    constraint fk_entrega_order foreign key (idOrder) references Orders(idOrder)
+);
+alter table Entrega auto_increment = 1;
+
 
 /*
 use ecommerce;
