@@ -1,6 +1,6 @@
 -- Criação do Banco de Dados para o cenário de E-commerce Aprimorado
 
--- drop database ecommerce_aprimorado;
+drop database ecommerce_aprimorado;
 show databases;
 create database if not exists ecommerce_aprimorado;
 use ecommerce_aprimorado;
@@ -8,6 +8,8 @@ use ecommerce_aprimorado;
 -- Criar tabela Cliente
 create table Clients(
 	IdClient int auto_increment primary key,
+    idClientPJ int,
+    idClientPF int,
 	Fname varchar(10), -- drop
     Minit char(3), -- drop
     Lname varchar(20), -- drop
@@ -20,12 +22,7 @@ create table Clients(
  );
 alter table Clients auto_increment = 1;
 
-select * from clients;
-select * from clientepf;
-select * from clientepj;
-
 -- Criar as tabelas ClientesPF e ClientesPJ
-
 create table ClientePF (
 	idClientPF int,
 	Fname varchar(10),
@@ -45,19 +42,24 @@ create table ClientePJ(
 -- Modificar a tabela Clients
 
 alter table Clients
-	modify column idClientePF int,
+	modify column idClientPF int,
     modify column idClientPJ int,
     drop column CPF,
     drop column CNPJ,
 	drop column Fname,
     drop column Minit,
     drop column Lname,
-    add constraint fk_client_pf foreign key (idClientePF) references ClientePF(idClientPF),
-    add constraint fk_client_pj foreign key (idClientPJ) references ClientePJ(idClientPJ),
-    add constraint ck_client_type check (
-										(ClientType = 'PF' AND idClientePJ IS NULL) OR
-                                        (ClientType = 'PJ' AND idClientePF IS NULL) )
+    add constraint fk_client_pf foreign key (idClientPF) references ClientePF(idClientPF),
+    add constraint fk_client_pj foreign key (idClientPJ) references ClientePJ(idClientPJ)
+    /*, add constraint ck_client_type check (
+										(ClientType = 'PF' AND idClientPJ IS NULL) OR
+                                        (ClientType = 'PJ' AND idClientPF IS NULL) )*/
 ;
+
+select * from clients;
+select * from clientepf;
+select * from clientepj;
+show tables;
 
 -- Criar tabela Produto
 
