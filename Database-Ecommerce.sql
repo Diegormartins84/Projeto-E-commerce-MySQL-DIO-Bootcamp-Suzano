@@ -7,11 +7,11 @@ use ecommerce;
 -- Criar tabela Cliente
 create table Clients(
 	IdClient int auto_increment primary key,
-    Fame varchar(10),
+    Fname varchar(10),
     Minit char(3),
     Lname varchar(20),
     CPF char(11) not null,
-    Address varchar(30),
+    Address varchar(255),
 	constraint unique_cpf_client unique (CPF)
 );
 alter table Clients auto_increment = 1;
@@ -21,12 +21,13 @@ alter table Clients auto_increment = 1;
 -- Size = dimensão do produto
 create table Product(
 	IdProduct int auto_increment primary key,
-    Pame varchar(10) not null,
+    Pname varchar(50) not null,
     Classification_kids bool default false,
     Category enum('Eletrônico','Vestimenta','Brinquedos','Alimentos','Móveis') not null,
     Avaliação float default 0,
-    Size varchar(10)
+    Size varchar(20)
 );
+alter table Product auto_increment = 1;
 -- desc product;
 
 -- para ser continuado no desafio: termine de  implementar a tabela e crie a conexão com as tabelas necessárias
@@ -48,15 +49,15 @@ primary key (IdClient, IdPayment)
 create table Orders(
 	IdOrder int auto_increment primary key,
     IdOrderClient int ,
-    OrderStatus enum('Cancelado', 'Confirmado', 'Em processamento') default 'Em processamento',
+    OrderStatus enum('Cancelado','Confirmado','Em processamento') default 'Em processamento',
     OrderDescription varchar(255),
     SendValue float default 10,
     PaymentCash boolean default false,
     -- IdPayment vai ser uma foreign key
     constraint fk_orders_client foreign key (IdOrderClient) references Clients(IdClient)
 		on update cascade ## todas as tabelas relacionadas a essa foreign key serão atualizadas
-		
 );
+alter table Orders auto_increment = 1;
 -- desc orders;
 
 -- Criar tabela estoque
@@ -66,6 +67,7 @@ create table productStorage(
     Location varchar (255),
     Quantity int default 0
 );
+alter table productStorage auto_increment = 1;
 
 -- Criar tabela fornecedor
 create table Supplier(
@@ -75,6 +77,7 @@ create table Supplier(
     Contact char (11) not null,
     constraint unique_supplier unique (CNPJ)
 );
+alter table Supplier auto_increment = 1;
 -- desc Supplier;
 
 -- Criar tabela vendedor
@@ -91,6 +94,7 @@ create table Seller(
     constraint unique_cnpj_supplier unique (CNPJ),
     constraint unique_cpf_supplier unique (CPF)
 );
+alter table Seller auto_increment = 1;
 -- desc Seller;
 
 -- Produto vendedor
@@ -135,7 +139,7 @@ create table productSupplier(
 );
 -- desc productSupplier;
 
-
+use ecommerce;
 show tables;
 use information_schema;
 show tables;
