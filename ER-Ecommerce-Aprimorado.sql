@@ -8,23 +8,29 @@ use ecommerce_aprimorado;
 -- Criar tabela Cliente
 create table Clients(
 	IdClient int auto_increment primary key,
-    Fname varchar(10),
-    Minit char(3),
-    Lname varchar(20),
+	Fname varchar(10), -- drop
+    Minit char(3), -- drop
+    Lname varchar(20), -- drop
     ClientType enum ('PF','PJ') not null,
-    CPF char(11),
-    CNPJ char(15),
+    CPF char(11), -- drop
+    CNPJ char(15), -- drop
     Address varchar(255),
 	constraint unique_cpf_client unique (CPF),
     constraint unique_cnpj_client unique (CNPJ)
- /*  ,constraint ck_tipo_cliente check (
-    (ClientType = 'PF' and CNPJ is null) or 
-    (ClientType = 'PJ' and CPF is null))*/
-);
+ );
 alter table Clients auto_increment = 1;
+
+select * from clients;
+select * from clientepf;
+select * from clientepj;
+
+-- Criar as tabelas ClientesPF e ClientesPJ
 
 create table ClientePF (
 	idClientPF int,
+	Fname varchar(10),
+    Minit char(3),
+    Lname varchar(20),
     CPF char(11),
     Bdate date,
     constraint fk_idclient_pf foreign key (idClientPF) references Clients(idClient)
@@ -35,6 +41,23 @@ create table ClientePJ(
     RazaoSocial varchar(50),
     constraint fk_idclient_pj foreign key (idClientPJ) references Clients(idClient)
 );
+
+-- Modificar a tabela Clients
+
+alter table Clients
+	modify column idClientePF int,
+    modify column idClientPJ int,
+    drop column CPF,
+    drop column CNPJ,
+	drop column Fname,
+    drop column Minit,
+    drop column Lname,
+    add constraint fk_client_pf foreign key (idClientePF) references ClientePF(idClientPF),
+    add constraint fk_client_pj foreign key (idClientPJ) references ClientePJ(idClientPJ),
+    add constraint ck_client_type check (
+										(ClientType = 'PF' AND idClientePJ IS NULL) OR
+                                        (ClientType = 'PJ' AND idClientePF IS NULL) )
+;
 
 -- Criar tabela Produto
 
