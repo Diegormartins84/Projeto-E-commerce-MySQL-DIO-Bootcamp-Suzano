@@ -13,13 +13,13 @@ create table ClientPF (
     Lname varchar(20),
     CPF char(11),
     Bdate date,
-    Adress varchar(255)
+    Address varchar(255)
 );
 create table ClientPJ(
 	idClientPJ int auto_increment primary key,
-    CNPJ char(15),
+    CNPJ char(14),
     RazaoSocial varchar(50),
-    Adress varchar(255)
+    Address varchar(255)
 );
 
 -- Criar tabela Cliente
@@ -199,18 +199,38 @@ select * from REFERENTIAL_CONSTRAINTS where constraint_schema = 'ecommerce';
 -- Inserção de dados e queries
 
 -- SET SESSION sql_mode = REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', '');
-use ecommerce;
+use ecommerce_aprimorado;
 show tables;
 -- idClient, Fname, Minit, Lname, CPF, Address
-insert into Clients(Fname, Minit, Lname, CPF, Address)
-values
-	('Maria','M','Silva',12346789,'rua silva de prata 29 , Carangola - Cidade das flores'),
-	('Matheus','O','Pimentel',987654321,'rua alemeda 289 , Centro - Cidade das flores'),
-    ('Ricardo','F','Silva',45678913,'avenida alemeda vinha 1009 , Centro - Cidade das flores'),
-    ('Julia','S','França',789123456,'rua lareijras 861 , Centro - Cidade das flores'),
-    ('Roberta','G','Assis',98745631,'Avenida de Koller 19 , Centro - Cidade das flores'),
-    ('Isabela','M','Cruz',654789123,'Rua Alameda das Flores 28 , Centro - Cidade das flores')
+insert into ClientPF(Fname, Minit, Lname, CPF, Bdate, Address) values
+	('Maria','M','Silva',12346789,'1984-01-05','rua silva de prata 29 , Carangola - Cidade das flores'),
+	('Matheus','O','Pimentel',987654321,'1995-05-15','rua alemeda 289 , Centro - Cidade das flores'),
+    ('Ricardo','F','Silva',45678913,'1986-07-20','avenida alemeda vinha 1009 , Centro - Cidade das flores'),
+    ('Julia','S','França',789123456,'1998-09-30','rua lareijras 861 , Centro - Cidade das flores'),
+    ('Roberta','G','Assis',98745631,'2001-12-01','Avenida de Koller 19 , Centro - Cidade das flores'),
+    ('Isabela','M','Cruz',654789123,'2003-08-10','Rua Alameda das Flores 28 , Centro - Cidade das flores')
 ;
+
+insert into ClientPJ(CNPJ,RazaoSocial,Address) values
+	('12345678000110','Empresa A','Rua das Flores 123, Centro - Cidade das flores'),
+    ('98765432000120','Empresa B','Avenida Brasil 456, Centro - Cidade das flores'),
+    ('56789012000130','Empresa C','Rua Venezuelandia 1313, Vila Margarida - Cidade das flores'),
+    ('23456789000140','Empresa D','Rua dos Jumencios 352, Bairro da Esperança - Cidade das flores')
+;
+
+insert into Clients(idClientPJ,idClientPF,ClientType) values
+	(null,'1','PF'),
+    (null,'2','PF'),
+    (null,'3','PF'),
+    (null,'4','PF'),
+    (null,'5','PF'),
+    (null,'6','PF'),
+    ('1',null,'PJ'),
+    ('2',null,'PJ'),
+    ('3',null,'PJ'),
+    ('4',null,'PJ')
+;
+
 desc product;
 -- idProduct, Pname, Classification_kids, Category, Avaliação, Size
 insert into Product(Pname, Classification_kids, Category, Avaliação, Size)
@@ -233,18 +253,20 @@ insert into Orders(IdOrderClient, OrderStatus, OrderDescription, SendValue, Paym
     (1,default,'compra via aplicativo',null,1),
     (2,default,'compra via aplicativo',50,0),
     (3,'Confirmado',null,null,1),
-    (4,default,'compra via web site',150,0)
+    (4,default,'compra via web site',150,0),
+    (2,default,'compra via aplicativo',null,1)
 ;
+    
 -- delete from orders where IdOrderClient in (1,2,3,4);
--- select * from orders;
+select * from clients;
 
 desc productOrder;
 -- idPOproduct,idPOorder,poQuantity,poStatus
 insert into productOrder(idPOproduct,idPOorder,poQuantity,poStatus)
 	values
-    (1,1,2,null),
-    (2,1,1,null),
-    (3,2,1,null)
+    (1,5,2,null),
+    (2,5,1,null),
+    (3,6,1,null)
 ;
 delete from productOrder where idPOproduct in (1,2,3);
 /*	(1,1,2,null),
@@ -290,25 +312,25 @@ insert into ProductSupplier(idPsSupplier,idPsProduct,Quantity)
     
 desc Seller;
 -- IdSeller,SocialName,AbstName,CNPJ,CPF,Location,Contact
-insert into Seller(SocialName,AbstName,CNPJ,CPF,Location,Contact)
+insert into Seller(SocialName,AbstName,CNPJ,CPF,SellerType,Location,Contact)
 	values
-	('Tech eletronics',null,123456789456321,null,'Rio de Janeiro',219946287),
-    ('Botique Durgas',null,null,123456783,'Rio de Janeiro',219567895),
-    ('Kids World',null,456789123654485,null,'São Paulo',1198657484);
-    
-desc ProductSeller;
+	('Tech eletronics',null,123456789456321,null,'PJ','Rio de Janeiro',219946287),
+    ('Botique Durgas',null,null,123456783,'PF','Rio de Janeiro',219567895),
+    ('Kids World',null,456789123654485,null,'PJ','São Paulo',1198657484);
+-- select * from seller;
+-- desc ProductSeller;
 -- idPseller,idPproduct,prodQuantity
 insert into ProductSeller(idPseller,idPproduct,prodQuantity)
 	values
-    (1,6,80),
-    (2,7,10);
+    (4,6,80),
+    (5,7,10);
 
 -- select * from productseller;
 -- select count(*) from Clients;
 -- verificar os pedidos feitos pelos clientes
 select * from clients c, orders o where c.idClient = o.idOrderClient;
 
-select Fname,Lname,idOrder,orderStatus from clients c, orders o where c.idClient = o.idOrderClient;
+-- select Fname,Lname,idOrder,orderStatus from clients c, orders o where c.idClient = o.idOrderClient;
 select concat(Fname,' ',Lname) as Client ,idOrder as Request ,orderStatus as Status from clients c, orders o where c.idClient = o.idOrderClient;
 
 insert into Orders(IdOrderClient, OrderStatus, OrderDescription, SendValue, PaymentCash) values
