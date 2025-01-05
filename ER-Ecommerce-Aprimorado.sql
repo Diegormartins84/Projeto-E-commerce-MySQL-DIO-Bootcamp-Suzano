@@ -84,12 +84,10 @@ create table Orders(
     OrderDescription varchar(255),
     SendValue float default 10,
     PaymentCash boolean default false,
-    -- IdPayment vai ser uma foreign key
     constraint fk_orders_client foreign key (IdOrderClient) references Clients(IdClient)
 		on update cascade ## todas as tabelas relacionadas a essa foreign key serão atualizadas
 );
 alter table Orders auto_increment = 1;
--- desc orders;
 
 -- Criar tabela estoque
 
@@ -109,7 +107,6 @@ create table Supplier(
     constraint unique_supplier unique (CNPJ)
 );
 alter table Supplier auto_increment = 1;
--- desc Supplier;
 
 -- Criar tabela vendedor
 -- dica de melhoramento (modelo refinado), separar CPF e CNPJ
@@ -126,11 +123,10 @@ create table Seller(
     constraint unique_cnpj_supplier unique (CNPJ),
     constraint unique_cpf_supplier unique (CPF),
 	constraint ck_tipo_vendedor check (
-    (SellerType = 'PF' and CNPJ is null) or 
-    (SellerType = 'PJ' and CPF is null)
+		(SellerType = 'PF' and CNPJ is null) or 
+		(SellerType = 'PJ' and CPF is null)
 ));
 alter table Seller auto_increment = 1;
--- desc Seller;
 
 -- Produto vendedor
 
@@ -142,7 +138,8 @@ create table productSeller(
     constraint fk_product_seller foreign key (idPseller) references Seller(IdSeller),
     constraint fk_product_product foreign key (idPproduct) references Product(IdProduct)
 );
--- desc productSeller;
+
+-- Produto pedido
 
 create table ProductOrder(
 	idPOproduct int,
@@ -153,7 +150,6 @@ create table ProductOrder(
 	constraint fk_product_order_product foreign key (idPOproduct) references Product(idProduct),
     constraint fk_product_order_order foreign key (idPOorder) references Orders(idOrder)
 );
--- drop table productorder;
 
 create table StorageLocation(
 	idLproduct int,
@@ -172,7 +168,6 @@ create table productSupplier(
     constraint fk_product_supplier_supplier foreign key (idPsSupplier) references Supplier(IdSupplier),
     constraint fk_product_supplier_product foreign key (idPsProduct) references Product(IdProduct)
 );
--- desc productSupplier;
 
 -- Criar tabela entrega
 
@@ -198,7 +193,6 @@ select * from REFERENTIAL_CONSTRAINTS where constraint_schema = 'ecommerce';
 
 -- Inserção de dados e queries
 
--- SET SESSION sql_mode = REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', '');
 use ecommerce_aprimorado;
 show tables;
 -- idClient, Fname, Minit, Lname, CPF, Address
@@ -325,33 +319,28 @@ insert into ProductSeller(idPseller,idPproduct,prodQuantity)
     (4,6,80),
     (5,7,10);
 
--- select * from productseller;
--- select count(*) from Clients;
--- verificar os pedidos feitos pelos clientes
-select * from clients c, orders o where c.idClient = o.idOrderClient;
-
--- select Fname,Lname,idOrder,orderStatus from clients c, orders o where c.idClient = o.idOrderClient;
-select concat(Fname,' ',Lname) as Client ,idOrder as Request ,orderStatus as Status from clients c, orders o where c.idClient = o.idOrderClient;
-
-insert into Orders(IdOrderClient, OrderStatus, OrderDescription, SendValue, PaymentCash) values
-    (2,default,'compra via aplicativo',null,1);
--- select * from orders;
-
--- verificar o número de incidentes
-select count(*) from clients c, orders o 
-	where c.idClient = o.idOrderClient
-	group by idOrder
-;
-
--- Recuperar quantos pedidos foram realizados pelos clientes
--- select * from Clients left outer join Orders on idClient = idOrderClient;
-select c.idClient, Fname, count(*) as NumberOfOrders from Clients c inner join Orders o on c.idClient = o.idOrderClient
-                    group by idClient
-;
 -- SET SESSION sql_mode = REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', '');
 
--- Recuperação de pedido com produto associado
-select c.idClient, Fname, count(*) as NumberOfOrders from Clients c inner join Orders o on c.idClient = o.idOrderClient
-					inner join ProductOrder p on p.idPOproduct = o.idOrder
-                    group by idClient
-;
+-- Quantos pedidos foram feitos por cada cliente?
+SELECT c.IdClient, COUNT(o.IdOrder) AS TotalPedidos
+FROM Clients c LEFT JOIN Orders o ON c.IdClient = o.IdOrderClient
+GROUP BY c.IdClient;
+
+-- Algum vendedor também é fornecedor?
+SELECT s.SocialName FROM Seller s
+JOIN Supplier sp ON s.CNPJ = sp.CNPJ;
+
+-- Relação de produtos fornecedores e estoques;
+SELECT p.Pname,s.SocialName,ps.Quantity,st.Location 
+FROM Product p
+JOIN productSupplier ps ON p.IdProduct = ps.idPsProduct
+JOIN Supplier s ON ps.idPsSupplier = s.IdSupplier
+JOIN StorageLocation sl ON p.IdProduct = sl.idLproduct
+JOIN productStorage st ON sl.idLstorage = st.IdProdStorage;
+
+-- Relação de nomes dos fornecedores e nomes dos produtos
+SELECT s.SocialName,p.Pname 
+FROM Supplier s
+JOIN productSupplier ps ON s.IdSupplier = ps.idPsSupplier
+JOIN Product p ON ps.idPsProduct = p.IdProduct;
+
