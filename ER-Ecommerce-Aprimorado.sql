@@ -5,61 +5,43 @@ show databases;
 create database if not exists ecommerce_aprimorado;
 use ecommerce_aprimorado;
 
--- Criar tabela Cliente
-create table Clients(
-	IdClient int auto_increment primary key,
-    idClientPJ int,
-    idClientPF int,
-	Fname varchar(10), -- drop
-    Minit char(3), -- drop
-    Lname varchar(20), -- drop
-    ClientType enum ('PF','PJ') not null,
-    CPF char(11), -- drop
-    CNPJ char(15), -- drop
-    Address varchar(255),
-	constraint unique_cpf_client unique (CPF),
-    constraint unique_cnpj_client unique (CNPJ)
- );
-alter table Clients auto_increment = 1;
-
 -- Criar as tabelas ClientesPF e ClientesPJ
-create table ClientePF (
-	idClientPF int,
+create table ClientPF (
+	idClientPF int auto_increment primary key,
 	Fname varchar(10),
     Minit char(3),
     Lname varchar(20),
     CPF char(11),
     Bdate date,
-    constraint fk_idclient_pf foreign key (idClientPF) references Clients(idClient)
+    Adress varchar(255)
 );
-create table ClientePJ(
-	idClientPJ int,
+create table ClientPJ(
+	idClientPJ int auto_increment primary key,
     CNPJ char(15),
     RazaoSocial varchar(50),
-    constraint fk_idclient_pj foreign key (idClientPJ) references Clients(idClient)
+    Adress varchar(255)
 );
 
--- Modificar a tabela Clients
-
+-- Criar tabela Cliente
+create table Clients(
+	IdClient int auto_increment primary key,
+    idClientPJ int,
+    idClientPF int,
+    ClientType enum ('PF','PJ') not null,
+    CONSTRAINT ck_tipo_cliente CHECK (
+        (ClientType = 'PF' AND idClientPJ IS NULL) OR 
+        (ClientType = 'PJ' AND idClientPF IS NULL) )
+ );
+alter table Clients auto_increment = 1;
 alter table Clients
-	modify column idClientPF int,
-    modify column idClientPJ int,
-    drop column CPF,
-    drop column CNPJ,
-	drop column Fname,
-    drop column Minit,
-    drop column Lname,
-    add constraint fk_client_pf foreign key (idClientPF) references ClientePF(idClientPF),
-    add constraint fk_client_pj foreign key (idClientPJ) references ClientePJ(idClientPJ)
-    /*, add constraint ck_client_type check (
-										(ClientType = 'PF' AND idClientPJ IS NULL) OR
-                                        (ClientType = 'PJ' AND idClientPF IS NULL) )*/
-;
+    add constraint fk_cliente_pf foreign key (idClientPF) references ClientPF(idClientPF),
+    add constraint fk_cliente_pj foreign key (idClientPJ) references ClientPJ(idClientPJ);
 
-select * from clients;
-select * from clientepf;
-select * from clientepj;
-show tables;
+
+-- select * from clients;
+-- select * from clientpf;
+-- select * from clientpj;
+-- show tables;
 
 -- Criar tabela Produto
 
@@ -68,7 +50,7 @@ create table Product(
     Pname varchar(50) not null,
     Classification_kids bool default false,
     Category enum('Eletrônico','Vestimenta','Brinquedos','Alimentos','Móveis') not null,
-    Avaliação enum('1','2','3','4','5') default 0,
+	Avaliação float default 0,
     Size varchar(20)
 );
 alter table Product auto_increment = 1;
@@ -79,16 +61,21 @@ alter table Product auto_increment = 1;
 -- criar constraints relacionada ao pagamento
 
 create table Payments(
-IdClient int,
-IdPayment int auto_increment primary key,
-TypePayment enum('Boleto','Cartão','Dois cartões','Pix'),
-LimitAvaible float,
-primary key (IdClient, IdPayment)
+	IdPayment int,
+	IdClient int,
+	PaymentType enum('Boleto','Cartão','Dois cartões','Pix'),
+	LimitAvaible float,
+    dadoscartao varchar(255),
+    chavepix varchar(50),
+    codigoboleto varchar(50),
+	primary key (IdClient, IdPayment),
+	constraint fk_payment_client foreign key (IdClient) references Clients(IdClient)
 );
 alter table Payments auto_increment = 1;
+-- select * from payments;
+-- drop table Payments;
 
 -- Criar tabela Pedido
--- drop table orders;
 
 create table Orders(
 	IdOrder int auto_increment primary key,
