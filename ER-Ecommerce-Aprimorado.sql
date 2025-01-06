@@ -1,6 +1,6 @@
 -- Criação do Banco de Dados para o cenário de E-commerce Aprimorado
 
-drop database ecommerce_aprimorado;
+-- drop database ecommerce_aprimorado;
 show databases;
 create database if not exists ecommerce_aprimorado;
 use ecommerce_aprimorado;
@@ -322,25 +322,79 @@ insert into ProductSeller(idPseller,idPproduct,prodQuantity)
 -- SET SESSION sql_mode = REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', '');
 
 -- Quantos pedidos foram feitos por cada cliente?
-SELECT c.IdClient, COUNT(o.IdOrder) AS TotalPedidos
-FROM Clients c LEFT JOIN Orders o ON c.IdClient = o.IdOrderClient
-GROUP BY c.IdClient;
+select c.IdClient, COUNT(o.IdOrder) as TotalPedidos
+from Clients c left join Orders o on c.IdClient = o.IdOrderClient
+group by c.IdClient;
 
 -- Algum vendedor também é fornecedor?
-SELECT s.SocialName FROM Seller s
-JOIN Supplier sp ON s.CNPJ = sp.CNPJ;
+select s.SocialName from Seller s
+join Supplier sp on s.CNPJ = sp.CNPJ;
 
 -- Relação de produtos fornecedores e estoques;
-SELECT p.Pname,s.SocialName,ps.Quantity,st.Location 
-FROM Product p
-JOIN productSupplier ps ON p.IdProduct = ps.idPsProduct
-JOIN Supplier s ON ps.idPsSupplier = s.IdSupplier
-JOIN StorageLocation sl ON p.IdProduct = sl.idLproduct
-JOIN productStorage st ON sl.idLstorage = st.IdProdStorage;
+select p.Pname,s.SocialName,ps.Quantity,st.Location from Product p
+join productSupplier ps on p.IdProduct = ps.idPsProduct
+join Supplier s on ps.idPsSupplier = s.IdSupplier
+join StorageLocation sl on p.IdProduct = sl.idLproduct
+join productStorage st on sl.idLstorage = st.IdProdStorage;
 
 -- Relação de nomes dos fornecedores e nomes dos produtos
-SELECT s.SocialName,p.Pname 
-FROM Supplier s
-JOIN productSupplier ps ON s.IdSupplier = ps.idPsSupplier
-JOIN Product p ON ps.idPsProduct = p.IdProduct;
+select s.SocialName,p.Pname from Supplier s
+join productSupplier ps on s.IdSupplier = ps.idPsSupplier
+join Product p on ps.idPsProduct = p.IdProduct;
+
+
+-- 
+-- Queries criadas para responder outras perguntas de negócios
+-- 
+
+-- Quais clientes pessoa física compraram produtos eletrônicos e brinquedos?
+select cp.Fname, cp.Lname, p.Pname from ClientPF cp
+join Clients c on cp.idClientPF = c.idClientPF
+join Orders o on c.IdClient = o.IdOrderClient
+join ProductOrder po on o.IdOrder = po.idPOorder
+join Product p on po.idPOproduct = p.IdProduct
+where p.Category in ('Eletrônico', 'Brinquedos');
+
+-- Qual cliente pessoa física realizou o pedido de maior valor?
+select cp.Fname, cp.Lname, max(o.SendValue) as MaiorValor
+from ClientPF cp
+join Clients c on cp.idClientPF = c.idClientPF
+join Orders o on c.IdClient = o.IdOrderClient
+group by cp.Fname, cp.Lname
+order by MaiorValor desc;
+
+-- Qual empresa realizou o maior número de pedidos?
+select cpj.RazaoSocial, COUNT(*) as NumPedidos
+from ClientPJ cpj
+join Clients c on cpj.idClientPJ = c.idClientPJ
+join Orders o on c.IdClient = o.IdOrderClient
+group by cpj.RazaoSocial
+order by NumPedidos desc;
+
+-- Quais são os produtos vendidos por vendedores que não têm CNPJ?
+select ps.idPproduct, p.Pname
+from ProductSeller ps
+join Product p on ps.idPproduct = p.IdProduct
+where ps.idPseller in (
+    select IdSeller
+    from Seller
+    where SellerType = 'PF'
+);
+
+-- Quais pedidos contêm produtos cuja quantidade disponível no armazenamento é maior que 100 unidades?
+select po.idPOorder, po.idPOproduct, po.poQuantity
+from ProductOrder po
+where po.idPOproduct in (
+    select idLproduct
+    from StorageLocation sl
+    join ProductStorage ps on sl.idLstorage = ps.IdProdStorage
+    where ps.Quantity > 100
+);
+
+-- Quais clientes fizeram mais de 1 pedido?
+select o.IdOrderClient, COUNT(o.IdOrder) as TotalPedidos from Orders o
+group by o.IdOrderClient
+having COUNT(o.IdOrder) > 1;
+
+
 
