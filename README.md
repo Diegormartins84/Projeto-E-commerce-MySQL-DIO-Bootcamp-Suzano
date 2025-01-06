@@ -31,6 +31,20 @@ O sistema permite o cadastro de produtos, clientes, fornecedores e a realizaçã
    * Um produto está associado a um estoque específico.
    * Um pedido pode ter um ou mais pagamentos
 
+**Banco de Dados**
+
+Além das funcionalidades descritas, o projeto inclui o script de criação do banco de dados em MySQL, permitindo que os desenvolvedores implementem e testem o sistema com uma estrutura de dados já definida.
+
+Estrutura
+
+* **Clientes PF e PJ:** Estruturados para suportar clientes físicos e jurídicos, com validações de integridade específicas.
+* **Produtos e Estoque:** Controle completo de produtos, fornecedores, e localização de armazenamento.
+* **Pedidos e Pagamentos:** Estruturados para atender pedidos com múltiplos produtos e formas de pagamento variadas.
+* **Fornecedores e Vendedores:** Relacionados diretamente aos produtos disponibilizados no sistema.
+
+O banco de dados foi desenvolvido no MySQL Workbench e inclui scripts de criação e inserção de dados para testes.
+
+
 **Tecnologias Utilizadas:**
 
    * Banco de dados: MySQL Workbench
