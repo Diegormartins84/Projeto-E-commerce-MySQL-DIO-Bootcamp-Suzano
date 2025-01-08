@@ -28,9 +28,9 @@ create table Clients(
     idClientPJ int,
     idClientPF int,
     ClientType enum ('PF','PJ') not null,
-    CONSTRAINT ck_tipo_cliente CHECK (
-        (ClientType = 'PF' AND idClientPJ IS NULL) OR 
-        (ClientType = 'PJ' AND idClientPF IS NULL) )
+    constraint ck_tipo_cliente check (
+        (ClientType = 'PF' and idClientPJ is null) or 
+        (ClientType = 'PJ' and idClientPF is null) )
  );
 alter table Clients auto_increment = 1;
 alter table Clients
